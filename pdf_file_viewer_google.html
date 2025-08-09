@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF表示セレクター</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        select, button {
+            margin: 10px 0;
+            padding: 5px;
+            font-size: 16px;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>観光案内PDF表示</h1>
+    <label>大分類:</label>
+    <select id="major" onchange="updateMiddle()">
+        <option value="">選択してください</option>
+    </select><br>
+
+    <label>中分類:</label>
+    <select id="middle" onchange="updateMinor()">
+        <option value="">選択してください</option>
+    </select><br>
+
+    <label>小分類:</label>
+    <select id="minor" onchange="showPDF()">
+        <option value="">選択してください</option>
+    </select><br>
+
+    <div id="pdfContainer" style="display:none;">
+        <iframe id="pdfViewer"></iframe>
+    </div>
+
+    <script>
+        const data = {"CALL CENTER": {"CALL CENTER": {"九州／山口トラベルサポート": "https://drive.google.com/file/d/1DECYuhbamh48EAMGyPeNavMxDBBwHG5J/preview?usp=drive_link"}}, "yame": {"MAP": {"ようこそ八女へ": "https://drive.google.com/file/d/17i1entL5XmrVU12LP5cdvjywo-MkW1VI/preview?usp=drive_link", "ようこそ八女へ（中国語）": "https://drive.google.com/file/d/1L_hOHJdVYmgqoSX3vzK8Wv122Ws0xzwR/preview?usp=drive_link", "Welcome_YAME": "https://drive.google.com/file/d/1t7lZ6hGWBZTsm6JKxHtFfZn4b79cZRQG/preview?usp=drive_link", "Central_Tea_Plantation": "https://drive.google.com/file/d/1NRoZn-w4L-5SdcyMcijWmFe94Rzqy53b/preview?usp=drive_link"}, "イベント": {"八女伝統工芸館_和紙作成（英語）": "https://drive.google.com/file/d/1ZnPXUavo_tIUL5xa7DwsmxKXuckugyQU/preview?usp=drive_link"}, "guide": {"YAME_GUIDE（ハングル）": "https://drive.google.com/file/d/1gnU0RayxMjZ_9GwQqSpwq8WkkKAHi4Tc/preview?usp=drive_link", "YAME_GUIDE（中国語）": "https://drive.google.com/file/d/1YH51mUCJwEIzGL8ThrSbSMUACQtsRK_M/preview?usp=drive_link", "YAME_GUIDE（英語）": "https://drive.google.com/file/d/1ataHI-Nedi02vOHopAX0CKu0KUgEKqCc/preview?usp=drive_link", "堺屋_横町町家交流館_八女伝統工芸館（英語）": "https://drive.google.com/file/d/1vxGKQTrSXz9j8_fZXhPMOTnJLjsGjKcE/preview?usp=drive_link"}, "歴史建造物": {"旧木下家住宅（堺屋）": "https://drive.google.com/file/d/1WQLqrYCeNTQExcFammpSQA6YqzDG3dWL/preview?usp=drive_link"}}, "yamecha": {"guide": {"Yame_Home_to_Green_Tea_（多言語）": "https://drive.google.com/file/d/1tGgwA3UehjsUGU3FKXINuCVJM0FNI6di/preview?usp=drive_link"}}, "黒木地区": {"ウォーキング": {"黒木の町並み「筑後黒木」": "https://drive.google.com/file/d/1rzUAU_4bQOaVn4s2rq0R1uXWjyPaWXH_/preview?usp=drive_link"}, "イベント": {"グリーンピア八女_森林セラピー基地": "https://drive.google.com/file/d/1tEsfXrDjqmiBrD4v1nz5M1ZbQplZLVoA/preview?usp=drive_link"}, "施設": {"グリーンピア八女_森林セラピー基地": "https://drive.google.com/file/d/1_-4aYPAV3Z2vHyBciFbeVxUaxbQLtT9C/preview?usp=drive_link"}, "キャンプ": {"奥八女焚火の森キャンプフィールド": "https://drive.google.com/file/d/1QW6w3AvO8c7MUapH6Jb-ZCTw5VWdeqrA/preview?usp=drive_link"}, "歴史建造物": {"旧松木家住宅": "https://drive.google.com/file/d/1RlKOVBfC5Phn0vsi39QHGMtl2x4GeJws/preview?usp=drive_link", "旧隈本家住宅_学びの館": "https://drive.google.com/file/d/1FKWF4meByT1fJeFjiFSysL_S1fy020Yg/preview?usp=drive_link"}}, "上陽地区": {"飲食": {"VILLA ARTIS": "https://drive.google.com/file/d/1hC122QMucBMqA2J-I32YeM43qWCd6k7w/preview?usp=drive_link"}, "ウォーキング": {"かむつやめさるこ": "https://drive.google.com/file/d/1EI22Z19TF98qwr-9azXSl3SMfD5e33d8/preview?usp=drive_link"}, "ミュージアム": {"ダニエル イノウエ ミュージアム１": "https://drive.google.com/file/d/1dpAXZAZSfkBPzm7NNeeQE7dcq1e-0k4k/preview?usp=drive_link", "ダニエル イノウエ ミュージアム２": "https://drive.google.com/file/d/1_KEQOgCdeJErdZ_sAsXAGKfLrbDf84OF/preview?usp=drive_link"}, "施設": {"馬場水車場（お香）": "https://drive.google.com/file/d/1zj5DNO43-2MrrUkUpRgBj7eTSiLszqxq/preview?usp=drive_link"}}, "立花地区": {"MAP": {"観光協会_立花支部": "https://drive.google.com/file/d/1npzsmyuTYjrxpSL1gja7XiPo6mQyl22f/preview?usp=drive_link"}, "寺院": {"壮厳院（男ノ子大仏）": "https://drive.google.com/file/d/1VgodbLufBLZMR5sYlCKNjPSzO286iiJC/preview?usp=drive_link"}, "ミュージアム": {"田崎廣助美術館": "https://drive.google.com/file/d/1QHDltyMMAtpO3ob51UW3wywTfoa29iSP/preview?usp=drive_link"}, "宿泊": {"男ノ子焼の里": "https://drive.google.com/file/d/1y9Dj-8WP4pwIfK1l5-8A27rKNUzYjLdS/preview?usp=drive_link"}, "施設": {"道の駅たちばな": "https://drive.google.com/file/d/1OysuRF_LRUi7q1uPP_j9oYQ7ImzcdjEF/preview?usp=drive_link"}}, "星野地区": {"飲食": {"エノハ荘": "https://drive.google.com/file/d/1BtC1fvICTsT2jrtmReckv14JYgxqn5dG/preview?usp=drive_link"}, "ガイド": {"星野村_観光マップ": "https://drive.google.com/file/d/1ZFt9HHxZTenRgKKcNgFal0pOjKbtJ518/preview?usp=drive_link", "星の文化館_星空ガイド": "https://drive.google.com/file/d/1nPBKji6ZErzYbp2uqeyiV93CGG1nK-qu/preview?usp=drive_link"}, "施設": {"星野焼展示館": "https://drive.google.com/file/d/1d1nBXpl2lVKnatNzQLH4X09c6F58JV4S/preview?usp=drive_link"}, "宿泊": {"池の山山荘・キャンプ場": "https://drive.google.com/file/d/1wOPQwWesWDq9oQlFRhaaGETtt3_R33Pi/preview?usp=drive_link"}, "イベント": {"茶の文化館_イベント_夏休み": "https://drive.google.com/file/d/1nXkH47G-CZyPYy0JpqdKRw1879DSSMD2/preview?usp=drive_link"}}, "矢部地区": {"ガイド": {"やべむら_観光マップ": "https://drive.google.com/file/d/1j8JmmltP5pcRcv-H4bq-QlU9R3Jh2NGC/preview?usp=drive_link"}, "ウォーキング": {"矢部村山系_八名山マップ": "https://drive.google.com/file/d/1CuFtEjDb88wD_WZORUw384T4f1cm6PTc/preview?usp=drive_link"}, "宿泊": {"奥八女別邸 やべのもり": "https://drive.google.com/file/d/17ePkb2Zg373s9maoV9GeHCVkofExA9ft/preview?usp=drive_link"}, "施設": {"杣のさと": "https://drive.google.com/file/d/1nA4_IqBS6omE1b3eKtPBVaXAARbJhkD3/preview?usp=drive_link"}}, "八女市": {"ガイド": {"町のコイン": "https://drive.google.com/file/d/1qEOT-mR84jqRaTkV1gQ9YLkzqmAcffyO/preview?usp=drive_link"}, "ツアー": {"バスツアー_年間スケジュール": "https://drive.google.com/file/d/1yl0BEhBI0XKX2fb9KXvTDAza5UjLaOa-/preview?usp=drive_link", "バスツアー_灯篭人形": "https://drive.google.com/file/d/1_ebH-k7pMsugFPnio1O6mgaKFNh5EXgE/preview?usp=drive_link"}, "観光大使": {"馬場美雅": "https://drive.google.com/file/d/1IQdr-OWW_qA1wo9fXlrbEmjp0phnZtwi/preview?usp=drive_link"}}, "八女地区": {"MAP": {"八女おでかけMAP": "https://drive.google.com/file/d/1EoKwftqru52x1tVCIga_PXEMPgCNROFG/preview?usp=drive_link", "八女おでかけMAP_広域_大茶園": "https://drive.google.com/file/d/14EOawHuLP96bIRivxNgkTFtS8YnoWQmE/preview?usp=drive_link", "古墳をたどるコース": "https://drive.google.com/file/d/1n7ddvfqbbpVIfVdzy0ODl164X4TCFu7W/preview?usp=drive_link", "特選仏壇MAP": "https://drive.google.com/file/d/1ptJa8Pmwrp0qNEAK2xq0QADDNnFhSchV/preview?usp=drive_link", "特選提灯店マップ": "https://drive.google.com/file/d/1CBwTNU8XRqzvhDtQAaNiUq-QmfntFePi/preview?usp=drive_link"}, "飲食": {"まる舎茶房": "https://drive.google.com/file/d/1RvqxpIakz7zBa2tfhMhKotqm21oiuXjY/preview?usp=drive_link", "べんがら村_クラフトビール": "https://drive.google.com/file/d/1xxQpNggwVGMT8xwDZyUfoAZ1YANqR96I/preview?usp=drive_link"}, "宿泊": {"RITA八女福島": "https://drive.google.com/file/d/1akLDskEUEEptXyk48RaFWAKIajX7DoRP/preview?usp=drive_link", "八女グリーンホテル": "https://drive.google.com/file/d/1vO-Pe3YqCYw6PuWke8UiWVH9hSJuzGzQ/preview?usp=drive_link"}, "イベント": {"べんがら夜市": "https://drive.google.com/file/d/1Zat7dBI15fSUqAFd7wyePaFRw1_EEP60/preview?usp=drive_link", "いわいの郷_夏の体験広場": "https://drive.google.com/file/d/19R-OjAHcZfsYSV-uZReVqjZ_bKNZCKc9/preview?usp=drive_link", "いわいの郷_歴史講座_日田の石人": "https://drive.google.com/file/d/1KvAHMNq6ID0xTVTFtQpsfR4e2vncnIJC/preview?usp=drive_link", "もんぺ博覧会＆巡業": "https://drive.google.com/file/d/12UpBDnDsubMSFdpWvdR2AWYqOSlEzL8h/preview?usp=drive_link", "茶の国_八女ハーフマラソン": "https://drive.google.com/file/d/11-pn_MAm-brOCuRsxW37bU-icUhvBLTP/preview?usp=drive_link", "八女伝統工芸館_「筑後モノづくり展」": "https://drive.google.com/file/d/1W6vT582Ugc6vMFBQr4K6p8MQ3rMcsL6M/preview?usp=drive_link", "八女伝統工芸館_にゃんちむのイラスト展": "https://drive.google.com/file/d/1on3Pyn4ecBqMJAjs3ItKj3NXqpXId7zM/preview?usp=drive_link", "八女伝統工芸館_ランプシェード「心を癒す光と影展」": "https://drive.google.com/file/d/11-nyrl_yoZM1Sjc87aL-8vEfZZzB0XmO/preview?usp=drive_link", "八女伝統工芸館_新作八女盆提灯展": "https://drive.google.com/file/d/1eWZjSiHJ7JXRpanOyGok71LPpULuNMYB/preview?usp=drive_link", "八女伝統工芸館_演奏会「奏」": "https://drive.google.com/file/d/1OvZZ07702JnnOPM-SJyrogKqSXijnCfj/preview?usp=drive_link", "八女伝統工芸館_芝居「父と暮らせば」": "https://drive.google.com/file/d/1uP-DT4yqvqyylg-dioGrjFnOFb6n46mF/preview?usp=drive_link", "八女市役所新庁舎_ナイトマルシェ": "https://drive.google.com/file/d/1Cc15mIjwmqv8ciGX6GUWvUgIpYdJg3vt/preview?usp=drive_link", "八女観光物産館__軽トラ市": "https://drive.google.com/file/d/1wD2vJQBzQwxJMv10o-15mdpzSJkGiLS5/preview?usp=drive_link"}, "ガイド": {"お食事リスト": "https://drive.google.com/file/d/1vOwhHUyV0f2b07p76Lj50xeI4KcWLipi/preview?usp=drive_link"}, "ショップ": {"ギャラリーKi to Te": "https://drive.google.com/file/d/1y3xJzK8Cm4ScC4WnjXw-_MKtLlEd6Aoo/preview?usp=drive_link", "人形": "https://drive.google.com/file/d/1R7GjXfCznLRXoFskIK98hyB9s7RST58A/preview?usp=drive_link"}, "古墳": {"岩戸山古墳_いわいの郷": "https://drive.google.com/file/d/1MHOMT5Ayf15OO-ryJ5Ae5mx-wu7jCEe2/preview?usp=drive_link"}, "歴史建造物": {"旧木下家住宅（堺屋）": "https://drive.google.com/file/d/1RWFp8oE9zgQTNEBTG2iCUdgmT1vMQVZK/preview?usp=drive_link"}}};
+
+        const majorSelect = document.getElementById('major');
+        const middleSelect = document.getElementById('middle');
+        const minorSelect = document.getElementById('minor');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const pdfContainer = document.getElementById('pdfContainer');
+
+        function updateMiddle() {
+            middleSelect.innerHTML = '<option value="">選択してください</option>';
+            minorSelect.innerHTML = '<option value="">選択してください</option>';
+            pdfContainer.style.display = 'none';
+            const major = majorSelect.value;
+            if (!major) return;
+            const middles = Object.keys(data[major]);
+            for (const middle of middles) {
+                const option = document.createElement('option');
+                option.value = middle;
+                option.textContent = middle;
+                middleSelect.appendChild(option);
+            }
+        }
+
+        function updateMinor() {
+            minorSelect.innerHTML = '<option value="">選択してください</option>';
+            pdfContainer.style.display = 'none';
+            const major = majorSelect.value;
+            const middle = middleSelect.value;
+            if (!major || !middle) return;
+            const minors = Object.keys(data[major][middle]);
+            for (const minor of minors) {
+                const option = document.createElement('option');
+                option.value = minor;
+                option.textContent = minor;
+                minorSelect.appendChild(option);
+            }
+        }
+
+        function showPDF() {
+            const major = majorSelect.value;
+            const middle = middleSelect.value;
+            const minor = minorSelect.value;
+            if (major && middle && minor) {
+                const filename = data[major][middle][minor];
+                pdfViewer.src = filename;
+                pdfContainer.style.display = 'block';
+            } else {
+                pdfContainer.style.display = 'none';
+            }
+        }
+
+        window.onload = () => {
+            const majors = Object.keys(data);
+            for (const major of majors) {
+                const option = document.createElement('option');
+                option.value = major;
+                option.textContent = major;
+                majorSelect.appendChild(option);
+            }
+        };
+    </script>
+</body>
+</html>
