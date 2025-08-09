@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>観光情報リンク選択</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        select, button {
+            margin: 10px 0;
+            padding: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>観光情報リンク選択</h1>
+    <label>大分類:</label>
+    <select id="major" onchange="updateMiddle()">
+        <option value="">選択してください</option>
+    </select><br>
+
+    <label>中分類:</label>
+    <select id="middle" onchange="updateMinor()">
+        <option value="">選択してください</option>
+    </select><br>
+
+    <label>小分類:</label>
+    <select id="minor" onchange="showButtons()">
+        <option value="">選択してください</option>
+    </select><br>
+
+    <div id="links" style="display:none;">
+        <button onclick="openURL('HP')">HPを見る</button>
+        <button onclick="openURL('GIS')">GISで見る</button>
+    </div>
+
+    <script>
+        const data = {"立花地区": {"ショップ": {"ますや 豆腐こんにゃく": {"HP_URL": "https://masuya-fktachibana.com/store_info.html?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1550990473898/130.619403242671/15"}, "立花ワイン工場・夢たちばな館": {"HP_URL": "https://www.tachibanawain.co.jp/index.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1972480444236/130.6009284/17"}, "提灯堂（八女提灯のシラキ工芸）": {"HP_URL": "https://chouchin.com/index.html?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2019636150898/130.550919292436/15"}}, "飲食": {"海鮮処 まるみつ": {"HP_URL": "https://yame-marumitsu.com/access/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1876488352891/130.610308624708/15"}}, "施設": {"旧大内邸（白城の里）": {"HP_URL": "https://ouchitei.jp/zh/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1407263439226/130.564736507959/15"}, "道の駅たちばな": {"HP_URL": "https://www.city.yame.fukuoka.jp/kanko/4/buy/1558570889497.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1876488352891/130.610308624708/15"}}, "寺院": {"壮厳院（男ノ子大仏）": {"HP_URL": "https://mari4724.crayonsite.info/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1712649189915/130.550313657673/15"}}, "宿泊": {"男ノ子焼の里": {"HP_URL": "https://www.crossroadfukuoka.jp/experience/12737?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1693069226183/130.547329084659/15"}, "大道谷の里": {"HP_URL": "https://ohmichidani.com/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1154665577401/130.563367/15"}}}, "筑後地域": {"工房": {"池田絣工房": {"HP_URL": "https://ikedakasuri.jp/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2261759085743/130.483494942326/15"}}}, "星野地区": {"ショップ": {"おばしゃんの店 清流": {"HP_URL": "https://www.crossroadfukuoka.jp/spot/10076", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.247023785909/130.757574857673/15"}, "星野村農産物直売所 びそん": {"HP_URL": "https://www.city.yame.fukuoka.jp/kanko/4/buy/index.html?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2520694985005/130.746119717152/15"}, "星野焼 源太窯": {"HP_URL": "https://www.crossroadfukuoka.jp/spot/10629?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2513275082764/130.740160617885/15"}}, "飲食": {"エノハ荘": {"HP_URL": "https://hoshinomura-enoha.com/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2255059311781/130.829911870571/15"}}, "茶園": {"星野製茶園": {"HP_URL": "https://www.hoshitea.com/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.263137/130.742398/15"}}, "施設": {"星の文化館": {"HP_URL": "https://www.hoshinofurusato.jp/constellation/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2452816201484/130.760341084659/15"}, "星野焼展示館": {"HP_URL": "https://www.city.yame.fukuoka.jp/soshiki/11/soumu/4/1454653581134.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2460421598622/130.7653863/15"}, "茶の文化館": {"HP_URL": "https://www.crossroadfukuoka.jp/experience/12850?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.245142/130.760358/15"}}, "寺院": {"大円寺": {"HP_URL": "https://chikugo7koku.net/sightseeing/daienji/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.259185514506/130.713800813494/15"}}, "観光地": {"鹿里の棚田": {"HP_URL": "https://www.crossroadfukuoka.jp/event/11776", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2740021562602/130.720948507959/15"}}, "宿泊": {"池の山山荘・キャンプ場": {"HP_URL": "https://www.crossroadfukuoka.jp/spot/10074", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.24705/130.757007/15"}}}, "八女地区": {"工房": {"下川織物": {"HP_URL": "https://kurumekasuri.jp/factory-info/simokawa/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2105914579227/130.579514711633/15"}, "溝田和紙": {"HP_URL": "https://hidden-fukuoka.com/arts-craft/474/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1949397781113/130.566834540549/15"}, "松尾和紙工房": {"HP_URL": "https://www.crossroadfukuoka.jp/spot/10961?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1940695187524/130.566718728835/15"}, "井上本店": {"HP_URL": "https://itp.ne.jp/zenkoku/fukuoka/yameshi/motomachi/shoppingu-okaimono/semmonten/ningyoten/400890627126450940", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2094193130526/130.556306786509/15"}}, "宿泊": {"RITA八女福島": {"HP_URL": "https://www.rita-community.jp/yame-fukushima/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2111520573652/130.560858842326/15"}, "Craft Inn 手 [té]": {"HP_URL": "https://craftinn.jp/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2092409048062/130.558541812889/15"}, "NIPPONIA HOTEL 八女福島 商家町": {"HP_URL": "https://www.vmg.co.jp/venues/yame-fukushima/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2091549964282/130.55535681349/15"}, "プラザホテル アベニュー": {"HP_URL": "https://www.rurubu.travel/hotel/japan/yanagawa/plaza-hotel-avenue?cid=1839115", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.213212/130.561273/15"}, "八女グリーンホテル": {"HP_URL": "https://mapfan.com/spots/SC3A4%2CJ%2CMR0?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2105231/130.5597565/15"}}, "ショップ": {"うなぎの寝床": {"HP_URL": "https://unagino-nedoko.net/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.209482/130.553318/15"}, "ウメノ雑貨店": {"HP_URL": "https://www.crossroadfukuoka.jp/cycle/14384?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2087086997097/130.55661997133/15"}, "ギャラリーKi to Te": {"HP_URL": "https://www.ki-to-te.com/pages/3488606/discography", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1953766708041/130.536579301856/15"}, "旧寺崎邸": {"HP_URL": "https://unagino-nedoko.net/store/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.211373/130.553497/15"}, "八女観光物産館 ときめき": {"HP_URL": "https://www.yamegourmet.com/shop/IRE96HQM?_pc=true&utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2076546741985/130.557540134948/15"}, "緒方仏壇本店": {"HP_URL": "https://www.crossroadfukuoka.jp/traditional-crafts/13892?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2127779261052/130.553758809481/15"}, "お茶村 本店": {"HP_URL": "https://ochamura.co.jp/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2161551499242/130.529023099999/15"}}, "飲食": {"MARUYA SABOUまる舎茶房": {"HP_URL": "https://muto-trip.com/yame/store/565", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.209276962957/130.557164512413/15"}}, "観光地": {"八女人形会館": {"HP_URL": "https://yameningyou.co.jp/about/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.21011/130.57422/15"}, "八女中央大茶園": {"HP_URL": "https://www.crossroadfukuoka.jp/spot/12916?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2393736481963/130.600912678508/15"}}, "施設": {"旧木下家住宅（堺屋）": {"HP_URL": "https://www.crossroadfukuoka.jp/spot/10674?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2123669791165/130.558024288366/15"}, "横町町家交流館": {"HP_URL": "https://yamekanko.com/machiya/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.209583/130.558698/15"}, "紙すき屋": {"HP_URL": "https://www.city.yame.fukuoka.jp/soshiki/3/55/tokusan/dentoukougeoi/1454652075470.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2070880473877/130.557357255816/15"}, "べんがら村": {"HP_URL": "https://www.bengalamura.com/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2030651567589/130.566364542326/15"}, "いわいの郷": {"HP_URL": "https://www.city.yame.fukuoka.jp/iwatoyama/index.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2313633594936/130.553323884653/15"}, "八女伝統工芸館": {"HP_URL": "https://yamedentoukougeikan.jimdoweb.com/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2071149777239/130.557443086509/15"}}}, "黒木地区": {"宿泊": {"グリーンパル日向神峡": {"HP_URL": "https://greenpal.jp/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1749998405851/130.77324845767/15"}, "奥八女焚火の森キャンプフィールド": {"HP_URL": "https://www.takibinomori.com/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2244774375129/130.7368535/15"}, "天空の茶屋敷": {"HP_URL": "https://www.skyteahouse.com/?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2155152276618/130.757477919186/15"}, "げんき館おおぶち": {"HP_URL": "https://www.city.yame.fukuoka.jp/oobuchi/index.html?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1810040353632/130.720604796306/15"}, "グリーンピア八女": {"HP_URL": "https://greenpia-yame.com/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.184622811787/130.679584084653/15"}}, "飲食": {"葵すし": {"HP_URL": "https://www.yameshi-shokokai.jp/member/list/%E8%91%B5%E3%81%99%E3%81%97/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.211281/130.668709/15"}, "味万": {"HP_URL": "https://tabelog.com/fukuoka/A4008/A400804/40036593/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.212798/130.668076/15"}}, "観光地": {"黒木の大藤": {"HP_URL": "https://www.city.yame.fukuoka.jp/soshiki/6/k1/4/1455882142964.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2131585549954/130.673199900866/15"}}, "寺院": {"霊巌寺": {"HP_URL": "https://www.crossroadfukuoka.jp/spot/10275", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.223444/130.74111/15"}}, "施設": {"旧松木家住宅": {"HP_URL": "https://www.city.yame.fukuoka.jp/soshiki/6/k1/2/1454653513019.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2125476423113/130.669792468104/15"}, "旧隈本家住宅": {"HP_URL": "https://www.city.yame.fukuoka.jp/soshiki/4/6/2/33/1454651993618.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2159968880684/130.668839980682/15"}}}, "上陽地区": {"施設": {"馬場水車場（お香）": {"HP_URL": "https://yame.travel/experience/chanokuni/2020/program_16.php", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2609942395101/130.669424357673/15"}, "ふるさとわらべ館": {"HP_URL": "https://www.crossroadfukuoka.jp/experience/12763?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2770095924946/130.627741713773/15"}, "ダニエル イノウエ ミュージアム": {"HP_URL": "https://daniel-inoue-museum.com/access.html", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.239287405129/130.643548915346/15"}}, "飲食": {"arika cafe": {"HP_URL": "https://www.yameshi-shokokai.jp/member/list/arika-cafe/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.237535973623/130.63966695344/15"}, "VILLA ARTIS": {"HP_URL": "https://villaartis.com/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2442785783485/130.646523171163/15"}}, "観光地": {"ひ・ふ・み・よ橋": {"HP_URL": "https://www.city.yame.fukuoka.jp/soshiki/9/j1/3/joyo_ishibashi_hifumiyo.html?utm_source=chatgpt.com", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.2394861688338/130.643706321716/15"}}}, "矢部地区": {"施設": {"杣のさと": {"HP_URL": "https://www.somanosato.com/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1551463191558/130.810666450325/15"}}, "観光地": {"八女津媛神社": {"HP_URL": "https://www.crossroadfukuoka.jp/spot/12822", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1594595508942/130.818417338613/15"}}, "宿泊": {"白糸旅館": {"HP_URL": "https://www.yameshi-shokokai.jp/member/list/%E7%99%BD%E7%B3%B8%E6%97%85%E9%A4%A8/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1713684187847/130.781729628836/15"}, "奥八女別邸 やべのもり": {"HP_URL": "https://hpdsp.jp/yabenomori/", "GIS_URL": "https://tdk2025.k-robot.jp/fukuoka_2025_gis/project_8_for_staff/a797b618fd0bc608cb25052bafbbd2164fecc175c054f551dc/33.1559983135631/130.81301050792/15"}}}};
+
+        const majorSelect = document.getElementById('major');
+        const middleSelect = document.getElementById('middle');
+        const minorSelect = document.getElementById('minor');
+        const linksDiv = document.getElementById('links');
+
+        function updateMiddle() {
+            middleSelect.innerHTML = '<option value="">選択してください</option>';
+            minorSelect.innerHTML = '<option value="">選択してください</option>';
+            linksDiv.style.display = 'none';
+            const major = majorSelect.value;
+            if (!major) return;
+            const middles = Object.keys(data[major]);
+            for (const middle of middles) {
+                const option = document.createElement('option');
+                option.value = middle;
+                option.textContent = middle;
+                middleSelect.appendChild(option);
+            }
+        }
+
+        function updateMinor() {
+            minorSelect.innerHTML = '<option value="">選択してください</option>';
+            linksDiv.style.display = 'none';
+            const major = majorSelect.value;
+            const middle = middleSelect.value;
+            if (!major || !middle) return;
+            const minors = Object.keys(data[major][middle]);
+            for (const minor of minors) {
+                const option = document.createElement('option');
+                option.value = minor;
+                option.textContent = minor;
+                minorSelect.appendChild(option);
+            }
+        }
+
+        function showButtons() {
+            const major = majorSelect.value;
+            const middle = middleSelect.value;
+            const minor = minorSelect.value;
+            if (major && middle && minor) {
+                linksDiv.style.display = 'block';
+            } else {
+                linksDiv.style.display = 'none';
+            }
+        }
+
+        function openURL(type) {
+            const major = majorSelect.value;
+            const middle = middleSelect.value;
+            const minor = minorSelect.value;
+            const urls = data[major][middle][minor];
+            if (type === 'HP') {
+                window.open(urls.HP_URL, '_blank');
+            } else {
+                window.open(urls.GIS_URL, '_blank');
+            }
+        }
+
+        window.onload = () => {
+            const majors = Object.keys(data);
+            for (const major of majors) {
+                const option = document.createElement('option');
+                option.value = major;
+                option.textContent = major;
+                majorSelect.appendChild(option);
+            }
+        };
+    </script>
+</body>
+</html>
